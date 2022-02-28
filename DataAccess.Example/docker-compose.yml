@@ -1,0 +1,46 @@
+version: '3.4'
+
+volumes:
+  dataaccess-datafiles:
+  logs-datafiles:
+
+services:
+    data-access-database:
+        image: mysql:5.7
+        ports:
+          - "3366:3306"
+        volumes:
+          - dataaccess-datafiles:/var/lib/mysql
+        restart: always
+        environment: 
+          MYSQL_ROOT_PASSWORD: dotnet.732
+          MYSQL_USER: dbuser
+          MYSQL_PASSWORD: dotnet.732
+          MYSQL_DATABASE: vehicles
+    logs-database:
+        image: mysql:5.7
+        ports:
+          - "3365:3306"
+        volumes:
+          - logs-datafiles:/var/lib/mysql
+        restart: always
+        environment: 
+          MYSQL_ROOT_PASSWORD: prueba.732
+          MYSQL_USER: dbuser
+          MYSQL_PASSWORD: dotnet.732
+          MYSQL_DATABASE: logs
+    dataaccess.example.webapi:
+        image: ${DOCKER_REGISTRY-}dataaccessexamplewebapi
+        build:
+          context: .
+          dockerfile: DataAccess.Example.WebApi/Dockerfile
+        depends_on: 
+            - catalog-database
+            - logs-database
+        ports:
+          - "5014:80"
+          - "732:443"
+        restart: always
+        #Specify Environment Variables for the Api Service
+        environment: 
+          - ASPNETCORE_ENVIRONMENT=Development
